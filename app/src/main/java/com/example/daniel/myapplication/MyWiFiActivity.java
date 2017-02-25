@@ -3,10 +3,12 @@ package com.example.daniel.myapplication;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -30,10 +32,16 @@ public class MyWiFiActivity extends AppCompatActivity {
     }
 
     public void setPeerStatus(List<WifiP2pDevice> peers){
+
         StringBuilder peerList = new StringBuilder();
         peerList.append("hello");
         TextView peerStatus = new TextView(this);
         peerStatus.setTextSize(40);
+        Log.d("Payara", "searching " + peers.size());
+        for (WifiP2pDevice ddevice : peers){
+            Log.d("Payara", ddevice.deviceName);
+            Log.d("Payara", ddevice.toString());
+        }
         if (peers.size() < 1){
             textView.setText("no devices found");
         } else {
@@ -41,6 +49,7 @@ public class MyWiFiActivity extends AppCompatActivity {
                 peerList.append(device);
             }
             textView.setText(peerList);
+            connect(peers.get(0));
         }
         layout.addView(peerStatus);
     }
@@ -94,7 +103,8 @@ public class MyWiFiActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 textView.setText("Searching");
-                setPeerStatus(((WiFiDirectBroadcastReceiver)mReceiver).getPeers());
+                //Searching is an asynchronous search and will not return in time to set status
+                //setPeerStatus(((WiFiDirectBroadcastReceiver)mReceiver).getPeers());
             }
 
             @Override
@@ -103,6 +113,25 @@ public class MyWiFiActivity extends AppCompatActivity {
             }
         });
 
+    }
+    public void connect(WifiP2pDevice device) {
+        //obtain a peer from the WifiP2pDeviceList
+
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = device.deviceAddress;
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                //success logic, this one is immediate and synchronous
+                textView.setText("WE HAVE LIFTOFF");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                //failure logic
+            }
+        });
     }
 
 

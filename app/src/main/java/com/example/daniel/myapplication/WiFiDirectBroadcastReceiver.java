@@ -53,6 +53,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             // request available peers from the wifi p2p manager. This is an
             // asynchronous call and the calling activity is notified with a
             // callback on PeerListListener.onPeersAvailable()
+            Log.d("Payara", "peers detected");
             if (mManager != null) {
                 mManager.requestPeers(mChannel, peerListListener);
             }
@@ -75,7 +76,13 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onPeersAvailable(WifiP2pDeviceList peerList) {
 
-            List<WifiP2pDevice> refreshedPeers = (List<WifiP2pDevice>) peerList.getDeviceList();
+            List<WifiP2pDevice> refreshedPeers = new ArrayList<>();
+            refreshedPeers.addAll(peerList.getDeviceList());
+            Log.d("Payara", peerList.getDeviceList().toString());
+            for (WifiP2pDevice ddevice : peers){
+                Log.d("payara", ddevice.deviceName);
+                Log.d("payara2", ddevice.toString());
+            }
             if (!refreshedPeers.equals(peers)) {
                 peers.clear();
                 peers.addAll(refreshedPeers);
@@ -84,7 +91,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 // of the change.  For instance, if you have a ListView of
                 // available peers, trigger an update.
                 //((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
-
+                mActivity.setPeerStatus(peers);
                 // Perform any other updates needed based on the new list of
                 // peers connected to the Wi-Fi P2P network.
             }
@@ -100,5 +107,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     public List<WifiP2pDevice> getPeers(){
         return peers;
     }
+
+
 
 }
